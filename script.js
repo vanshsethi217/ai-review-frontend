@@ -1,8 +1,13 @@
 const API_BASE_URL = "https://ogle-gratified-imperial.ngrok-free.dev";
 
+function setPreset(text) {
+    document.getElementById("prompt").value = text;
+}
+
 function runScan() {
     const owner = document.getElementById("owner").value.trim();
     const repo = document.getElementById("repo").value.trim();
+    const prompt = document.getElementById("prompt").value.trim();
     const statusDiv = document.getElementById("status");
     const resultBox = document.getElementById("resultBox");
     const scanButton = document.getElementById("scanButton");
@@ -23,7 +28,7 @@ function runScan() {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ owner: owner, repo: repo })
+        body: JSON.stringify({ owner: owner, repo: repo, prompt: prompt })
     })
     .then(function(response) {
         return response.json();
