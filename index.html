@@ -9,16 +9,13 @@
 
     <div class="container">
         <h1>AI Security Review Platform</h1>
-        <p class="subtitle">Scan any GitHub repository for security vulnerabilities using AI</p>
+        <p class="subtitle">Scan any of your GitHub repositories for security vulnerabilities using AI</p>
 
         <div class="form-group">
-            <label for="owner">GitHub Username / Organization</label>
-            <input type="text" id="owner" placeholder="e.g. vanshsethi217">
-        </div>
-
-        <div class="form-group">
-            <label for="repo">Repository Name</label>
-            <input type="text" id="repo" placeholder="e.g. ai-review-reports">
+            <label for="repo">Repository</label>
+            <select id="repo">
+                <option value="">Loading repositories...</option>
+            </select>
         </div>
 
         <div class="form-group">
@@ -30,6 +27,10 @@
                 <button type="button" class="preset-btn" onclick="setPreset('performance and code efficiency')">Performance</button>
                 <button type="button" class="preset-btn" onclick="setPreset('')">Clear</button>
             </div>
+            <div class="saved-prompts-row">
+                <button type="button" class="save-prompt-btn" onclick="saveCurrentPrompt()">+ Save current prompt</button>
+            </div>
+            <div id="savedPromptsList" class="saved-prompts-list"></div>
         </div>
 
         <button id="scanButton" onclick="runScan()">Run Scan Now</button>
