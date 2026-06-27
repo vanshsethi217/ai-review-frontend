@@ -10,7 +10,9 @@ function setPreset(text) {
 
 function loadRepoDropdown() {
     const repoSelect = document.getElementById("repo");
-    fetch(API_BASE_URL + "/list-repos")
+    fetch(API_BASE_URL + "/list-repos", {
+        headers: { "ngrok-skip-browser-warning": "true" }
+    })
         .then(function(response) { return response.json(); })
         .then(function(data) {
             if (data.error || !data.repos) {
@@ -111,7 +113,8 @@ function runScan() {
     fetch(API_BASE_URL + "/scan-repo", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true"
         },
         body: JSON.stringify({ owner: DEFAULT_OWNER, repo: repo, prompt: prompt })
     })
