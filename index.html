@@ -21,6 +21,7 @@
         <div class="form-group">
             <label for="prompt">Custom Review Focus (optional)</label>
             <textarea id="prompt" rows="3" placeholder="e.g. Focus only on SQL injection and authentication issues"></textarea>
+            <div class="preset-label">Suggested prompts (click to use):</div>
             <div class="preset-buttons">
                 <button type="button" class="preset-btn" onclick="setPreset('SQL injection and database security')">SQL Injection</button>
                 <button type="button" class="preset-btn" onclick="setPreset('OWASP Top 10 vulnerabilities')">OWASP Top 10</button>
@@ -36,6 +37,7 @@
         <button id="scanButton" onclick="runScan()">Run Scan Now</button>
 
         <div id="status"></div>
+        <div id="progressList" class="progress-list"></div>
 
         <div id="resultBox" class="result-box hidden">
             <h3>Scan Complete</h3>

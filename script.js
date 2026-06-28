@@ -3,6 +3,8 @@ const DEFAULT_OWNER = "vanshsethi217";
 
 let scanTimerInterval = null;
 let scanStartTime = null;
+let progressPollInterval = null;
+let currentScanId = null;
 
 function setPreset(text) {
     document.getElementById("prompt").value = text;
@@ -76,12 +78,16 @@ function removeSavedPrompt(index) {
     loadSavedPrompts();
 }
 
+function generateScanId() {
+    return "scan_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+}
+
 function startScanTimer() {
     scanStartTime = Date.now();
     const statusDiv = document.getElementById("status");
     scanTimerInterval = setInterval(function() {
         const elapsedSeconds = Math.floor((Date.now() - scanStartTime) / 1000);
-        statusDiv.textContent = "Scanning repository... " + elapsedSeconds + "s elapsed (large repos may take a few minutes)";
+        statusDiv.textContent = elapsedSeconds + "s elapsed (large repos may take a few minutes)";
     }, 1000);
 }
 
@@ -89,6 +95,28 @@ function stopScanTimer() {
     if (scanTimerInterval) {
         clearInterval(scanTimerInterval);
         scanTimerInterval = null;
+    }
+}
+
+function startProgressPolling(scanId) {
+    const progressList = document.getElementById("progressList");
+    progressList.innerHTML = "";
+    progressPollInterval = setInterval(function() {
+        fetch(API_BASE_URL + "/scan-status?scan_id=" + scanId, {
+            headers: { "ngrok-skip-browser-warning": "true" }
+        })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                progressList.textContent = data.message || "";
+            })
+            .catch(function() {});
+    }, 1000);
+}
+
+function stopProgressPolling() {
+    if (progressPollInterval) {
+        clearInterval(progressPollInterval);
+        progressPollInterval = null;
     }
 }
 
@@ -106,9 +134,11 @@ function runScan() {
         return;
     }
 
+    currentScanId = generateScanId();
     scanButton.disabled = true;
     scanButton.textContent = "Scanning...";
     startScanTimer();
+    startProgressPolling(currentScanId);
 
     fetch(API_BASE_URL + "/scan-repo", {
         method: "POST",
@@ -116,13 +146,15 @@ function runScan() {
             "Content-Type": "application/json",
             "ngrok-skip-browser-warning": "true"
         },
-        body: JSON.stringify({ owner: DEFAULT_OWNER, repo: repo, prompt: prompt })
+        body: JSON.stringify({ owner: DEFAULT_OWNER, repo: repo, prompt: prompt, scan_id: currentScanId })
     })
     .then(function(response) {
         return response.json();
     })
     .then(function(data) {
         stopScanTimer();
+        stopProgressPolling();
+        document.getElementById("progressList").textContent = "";
         scanButton.disabled = false;
         scanButton.textContent = "Run Scan Now";
 
@@ -142,6 +174,7 @@ function runScan() {
     })
     .catch(function(error) {
         stopScanTimer();
+        stopProgressPolling();
         scanButton.disabled = false;
         scanButton.textContent = "Run Scan Now";
         statusDiv.textContent = "Request failed: " + error;
