@@ -191,7 +191,7 @@ function runScan() {
             "Scanned " + data.files_scanned + " file(s), found " + data.total_findings + " finding(s).";
 
         const reportLinkEl = document.getElementById("reportLink");
-        reportLinkEl.href = "#";
+        reportLinkEl.href = data.report_url;
         reportLinkEl.textContent = "Preparing report link... (usually under 30s)";
         resultBox.classList.remove("hidden");
 
