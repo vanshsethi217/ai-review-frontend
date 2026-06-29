@@ -203,7 +203,7 @@ function runScan() {
                 reportLinkEl.href = data.report_url;
                 reportLinkEl.textContent = "Open Report (may still be deploying - retry if blank)";
             }
-        }, 8);
+        }, 12);
     })
     .catch(function(error) {
         stopScanTimer();
