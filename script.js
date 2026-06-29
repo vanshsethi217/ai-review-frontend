@@ -120,6 +120,28 @@ function stopProgressPolling() {
     }
 }
 
+function waitForReportAvailable(reportUrl, onReady, attemptsLeft) {
+    if (attemptsLeft <= 0) {
+        onReady(false);
+        return;
+    }
+    fetch(reportUrl, { method: "HEAD", cache: "no-store" })
+        .then(function(response) {
+            if (response.ok) {
+                onReady(true);
+            } else {
+                setTimeout(function() {
+                    waitForReportAvailable(reportUrl, onReady, attemptsLeft - 1);
+                }, 5000);
+            }
+        })
+        .catch(function() {
+            setTimeout(function() {
+                waitForReportAvailable(reportUrl, onReady, attemptsLeft - 1);
+            }, 5000);
+        });
+}
+
 function runScan() {
     const repo = document.getElementById("repo").value.trim();
     const prompt = document.getElementById("prompt").value.trim();
@@ -168,9 +190,20 @@ function runScan() {
         document.getElementById("resultSummary").textContent =
             "Scanned " + data.files_scanned + " file(s), found " + data.total_findings + " finding(s).";
 
-        document.getElementById("reportLink").href = data.report_url;
-
+        const reportLinkEl = document.getElementById("reportLink");
+        reportLinkEl.href = "#";
+        reportLinkEl.textContent = "Preparing report link... (usually under 30s)";
         resultBox.classList.remove("hidden");
+
+        waitForReportAvailable(data.report_url, function(isReady) {
+            if (isReady) {
+                reportLinkEl.href = data.report_url;
+                reportLinkEl.textContent = "Open Report";
+            } else {
+                reportLinkEl.href = data.report_url;
+                reportLinkEl.textContent = "Open Report (may still be deploying - retry if blank)";
+            }
+        }, 8);
     })
     .catch(function(error) {
         stopScanTimer();
