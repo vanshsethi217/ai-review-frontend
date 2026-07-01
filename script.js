@@ -36,26 +36,38 @@ function loadRepoDropdown() {
 
 function loadSavedPrompts() {
     const listDiv = document.getElementById("savedPromptsList");
-    const saved = JSON.parse(localStorage.getItem("savedPrompts") || "[]");
-    listDiv.innerHTML = "";
-    saved.forEach(function(promptText, index) {
-        const chip = document.createElement("span");
-        chip.className = "saved-prompt-chip";
-        const shortLabel = promptText.length > 30 ? promptText.substring(0, 30) + "..." : promptText;
-        chip.textContent = shortLabel;
-        chip.title = promptText;
-        chip.onclick = function() { setPreset(promptText); };
+    fetch(API_BASE_URL + "/prompts", {
+        headers: { "ngrok-skip-browser-warning": "true" }
+    })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            const saved = data.prompts || [];
+            listDiv.innerHTML = "";
+            saved.forEach(function(promptObj) {
+                const promptText = promptObj.prompt_text;
+                const promptId = promptObj.id;
 
-        const removeBtn = document.createElement("span");
-        removeBtn.textContent = " x";
-        removeBtn.className = "remove-prompt-x";
-        removeBtn.onclick = function(e) {
-            e.stopPropagation();
-            removeSavedPrompt(index);
-        };
-        chip.appendChild(removeBtn);
-        listDiv.appendChild(chip);
-    });
+                const chip = document.createElement("span");
+                chip.className = "saved-prompt-chip";
+                const shortLabel = promptText.length > 30 ? promptText.substring(0, 30) + "..." : promptText;
+                chip.textContent = shortLabel;
+                chip.title = promptText + (promptObj.created_by ? " (saved by " + promptObj.created_by + ")" : "");
+                chip.onclick = function() { setPreset(promptText); };
+
+                const removeBtn = document.createElement("span");
+                removeBtn.textContent = " x";
+                removeBtn.className = "remove-prompt-x";
+                removeBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    removeSavedPrompt(promptId);
+                };
+                chip.appendChild(removeBtn);
+                listDiv.appendChild(chip);
+            });
+        })
+        .catch(function() {
+            listDiv.innerHTML = "";
+        });
 }
 
 function saveCurrentPrompt() {
@@ -63,19 +75,31 @@ function saveCurrentPrompt() {
     if (!promptText) {
         return;
     }
-    const saved = JSON.parse(localStorage.getItem("savedPrompts") || "[]");
-    if (saved.indexOf(promptText) === -1) {
-        saved.push(promptText);
-        localStorage.setItem("savedPrompts", JSON.stringify(saved));
-        loadSavedPrompts();
-    }
+    fetch(API_BASE_URL + "/prompts", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true"
+        },
+        body: JSON.stringify({ prompt_text: promptText, created_by: "dashboard-user" })
+    })
+        .then(function(response) { return response.json(); })
+        .then(function() {
+            loadSavedPrompts();
+        })
+        .catch(function() {});
 }
 
-function removeSavedPrompt(index) {
-    const saved = JSON.parse(localStorage.getItem("savedPrompts") || "[]");
-    saved.splice(index, 1);
-    localStorage.setItem("savedPrompts", JSON.stringify(saved));
-    loadSavedPrompts();
+function removeSavedPrompt(promptId) {
+    fetch(API_BASE_URL + "/prompts/" + promptId, {
+        method: "DELETE",
+        headers: { "ngrok-skip-browser-warning": "true" }
+    })
+        .then(function(response) { return response.json(); })
+        .then(function() {
+            loadSavedPrompts();
+        })
+        .catch(function() {});
 }
 
 function generateScanId() {
