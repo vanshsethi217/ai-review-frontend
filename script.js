@@ -215,16 +215,17 @@ function runScan() {
             "Scanned " + data.files_scanned + " file(s), found " + data.total_findings + " finding(s).";
 
         const reportLinkEl = document.getElementById("reportLink");
-        reportLinkEl.href = data.report_url;
+        reportLinkEl.removeAttribute("href");
+        reportLinkEl.classList.add("preparing");
         reportLinkEl.textContent = "Preparing report link... (usually under 30s)";
         resultBox.classList.remove("hidden");
 
         waitForReportAvailable(data.report_url, function(isReady) {
+            reportLinkEl.classList.remove("preparing");
+            reportLinkEl.href = data.report_url;
             if (isReady) {
-                reportLinkEl.href = data.report_url;
                 reportLinkEl.textContent = "Open Report";
             } else {
-                reportLinkEl.href = data.report_url;
                 reportLinkEl.textContent = "Open Report (may still be deploying - retry if blank)";
             }
         }, 12);

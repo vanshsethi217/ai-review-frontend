@@ -207,6 +207,13 @@ button:disabled {
     text-decoration: none;
 }
 
+.report-link.preparing {
+    color: #888;
+    cursor: default;
+    pointer-events: none;
+    font-weight: 400;
+}
+
 .hidden {
     display: none;
 }
