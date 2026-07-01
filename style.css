@@ -85,6 +85,28 @@ input[type="text"], textarea, select {
     background-color: #e0e7ff;
 }
 
+.clear-prompt-row {
+    margin-top: 6px;
+}
+
+.clear-btn {
+    width: auto;
+    padding: 3px 8px;
+    background-color: transparent;
+    color: #999;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 400;
+    cursor: pointer;
+    margin-top: 0;
+}
+
+.clear-btn:hover {
+    background-color: #f5f5f5;
+    color: #666;
+}
+
 .saved-prompts-row {
     margin-top: 10px;
 }
