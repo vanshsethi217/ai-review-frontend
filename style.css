@@ -77,6 +77,13 @@ h1 {
     background-color: #eee;
 }
 
+.signed-out-message {
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+    padding: 24px 0;
+}
+
 .form-group {
     margin-bottom: 16px;
 }

@@ -31,11 +31,15 @@ function updateLoginUI() {
     const loginStatusEl = document.getElementById("loginStatus");
     const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
+    const scanForm = document.getElementById("scanForm");
+    const signedOutMessage = document.getElementById("signedOutMessage");
 
     if (!sessionId) {
-        loginStatusEl.textContent = "Not signed in \u2014 showing default repositories.";
+        loginStatusEl.textContent = "Not signed in.";
         loginBtn.classList.remove("hidden");
         logoutBtn.classList.add("hidden");
+        scanForm.classList.add("hidden");
+        signedOutMessage.classList.remove("hidden");
         return;
     }
 
@@ -48,15 +52,22 @@ function updateLoginUI() {
                 loginStatusEl.textContent = "Signed in as " + data.username;
                 loginBtn.classList.add("hidden");
                 logoutBtn.classList.remove("hidden");
+                scanForm.classList.remove("hidden");
+                signedOutMessage.classList.add("hidden");
+                loadRepoDropdown();
             } else {
                 sessionStorage.removeItem(SESSION_STORAGE_KEY);
-                loginStatusEl.textContent = "Not signed in \u2014 showing default repositories.";
+                loginStatusEl.textContent = "Not signed in.";
                 loginBtn.classList.remove("hidden");
                 logoutBtn.classList.add("hidden");
+                scanForm.classList.add("hidden");
+                signedOutMessage.classList.remove("hidden");
             }
         })
         .catch(function() {
-            loginStatusEl.textContent = "Not signed in \u2014 showing default repositories.";
+            loginStatusEl.textContent = "Not signed in.";
+            scanForm.classList.add("hidden");
+            signedOutMessage.classList.remove("hidden");
         });
 }
 
@@ -77,12 +88,10 @@ function logout() {
         .then(function() {
             sessionStorage.removeItem(SESSION_STORAGE_KEY);
             updateLoginUI();
-            loadRepoDropdown();
         })
         .catch(function() {
             sessionStorage.removeItem(SESSION_STORAGE_KEY);
             updateLoginUI();
-            loadRepoDropdown();
         });
 }
 
@@ -326,5 +335,4 @@ function runScan() {
 
 captureSessionIdFromUrl();
 updateLoginUI();
-loadRepoDropdown();
 loadSavedPrompts();

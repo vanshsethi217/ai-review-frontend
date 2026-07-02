@@ -17,41 +17,47 @@
             <button id="logoutBtn" class="logout-btn hidden" onclick="logout()">Sign out</button>
         </div>
 
-        <div class="form-group">
-            <label for="repo">Repository</label>
-            <select id="repo">
-                <option value="">Loading repositories...</option>
-            </select>
+        <div id="signedOutMessage" class="signed-out-message">
+            Sign in with GitHub above to select and scan your repositories.
         </div>
 
-        <div class="form-group">
-            <label for="prompt">Custom Review Focus (optional)</label>
-            <textarea id="prompt" rows="3" placeholder="e.g. Focus only on SQL injection and authentication issues"></textarea>
-            <div class="preset-label-row">
-                <span class="preset-label">Suggested prompts (click to use):</span>
-                <button type="button" class="clear-btn" onclick="setPreset('')">&#10005; clear</button>
+        <div id="scanForm" class="hidden">
+            <div class="form-group">
+                <label for="repo">Repository</label>
+                <select id="repo">
+                    <option value="">Loading repositories...</option>
+                </select>
             </div>
-            <div class="preset-buttons">
-                <button type="button" class="preset-btn" onclick="setPreset('SQL injection and database security')">SQL Injection</button>
-                <button type="button" class="preset-btn" onclick="setPreset('OWASP Top 10 vulnerabilities')">OWASP Top 10</button>
-                <button type="button" class="preset-btn" onclick="setPreset('performance and code efficiency')">Performance</button>
-                <button type="button" class="preset-btn" onclick="setPreset('Find hardcoded credentials, API keys, passwords, tokens, and secrets in the code')">Hardcoded Secrets</button>
+
+            <div class="form-group">
+                <label for="prompt">Custom Review Focus (optional)</label>
+                <textarea id="prompt" rows="3" placeholder="e.g. Focus only on SQL injection and authentication issues"></textarea>
+                <div class="preset-label-row">
+                    <span class="preset-label">Suggested prompts (click to use):</span>
+                    <button type="button" class="clear-btn" onclick="setPreset('')">&#10005; clear</button>
+                </div>
+                <div class="preset-buttons">
+                    <button type="button" class="preset-btn" onclick="setPreset('SQL injection and database security')">SQL Injection</button>
+                    <button type="button" class="preset-btn" onclick="setPreset('OWASP Top 10 vulnerabilities')">OWASP Top 10</button>
+                    <button type="button" class="preset-btn" onclick="setPreset('performance and code efficiency')">Performance</button>
+                    <button type="button" class="preset-btn" onclick="setPreset('Find hardcoded credentials, API keys, passwords, tokens, and secrets in the code')">Hardcoded Secrets</button>
+                </div>
+                <div class="saved-prompts-row">
+                    <button type="button" class="save-prompt-btn" onclick="saveCurrentPrompt()">+ Save current prompt</button>
+                </div>
+                <div id="savedPromptsList" class="saved-prompts-list"></div>
             </div>
-            <div class="saved-prompts-row">
-                <button type="button" class="save-prompt-btn" onclick="saveCurrentPrompt()">+ Save current prompt</button>
+
+            <button id="scanButton" onclick="runScan()">Run Scan Now</button>
+
+            <div id="status"></div>
+            <div id="progressList" class="progress-list"></div>
+
+            <div id="resultBox" class="result-box hidden">
+                <h3>Scan Complete</h3>
+                <p id="resultSummary"></p>
+                <a id="reportLink" href="#" target="_blank" class="report-link">Open Report</a>
             </div>
-            <div id="savedPromptsList" class="saved-prompts-list"></div>
-        </div>
-
-        <button id="scanButton" onclick="runScan()">Run Scan Now</button>
-
-        <div id="status"></div>
-        <div id="progressList" class="progress-list"></div>
-
-        <div id="resultBox" class="result-box hidden">
-            <h3>Scan Complete</h3>
-            <p id="resultSummary"></p>
-            <a id="reportLink" href="#" target="_blank" class="report-link">Open Report</a>
         </div>
     </div>
 
