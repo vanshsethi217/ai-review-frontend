@@ -1,10 +1,90 @@
 const API_BASE_URL = "https://ogle-gratified-imperial.ngrok-free.dev";
 const DEFAULT_OWNER = "vanshsethi217";
+const SESSION_STORAGE_KEY = "github_session_id";
 
 let scanTimerInterval = null;
 let scanStartTime = null;
 let progressPollInterval = null;
 let currentScanId = null;
+
+function getSessionId() {
+    return sessionStorage.getItem(SESSION_STORAGE_KEY);
+}
+
+function captureSessionIdFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get("session_id");
+    const loginError = urlParams.get("login_error");
+
+    if (sessionId) {
+        sessionStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    if (loginError) {
+        document.getElementById("loginStatus").textContent = "Login failed: " + loginError;
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+}
+
+function updateLoginUI() {
+    const sessionId = getSessionId();
+    const loginStatusEl = document.getElementById("loginStatus");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (!sessionId) {
+        loginStatusEl.textContent = "Not signed in \u2014 showing default repositories.";
+        loginBtn.classList.remove("hidden");
+        logoutBtn.classList.add("hidden");
+        return;
+    }
+
+    fetch(API_BASE_URL + "/auth/me?session_id=" + encodeURIComponent(sessionId), {
+        headers: { "ngrok-skip-browser-warning": "true" }
+    })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data.logged_in) {
+                loginStatusEl.textContent = "Signed in as " + data.username;
+                loginBtn.classList.add("hidden");
+                logoutBtn.classList.remove("hidden");
+            } else {
+                sessionStorage.removeItem(SESSION_STORAGE_KEY);
+                loginStatusEl.textContent = "Not signed in \u2014 showing default repositories.";
+                loginBtn.classList.remove("hidden");
+                logoutBtn.classList.add("hidden");
+            }
+        })
+        .catch(function() {
+            loginStatusEl.textContent = "Not signed in \u2014 showing default repositories.";
+        });
+}
+
+function loginWithGitHub() {
+    window.location.href = API_BASE_URL + "/auth/github/login";
+}
+
+function logout() {
+    const sessionId = getSessionId();
+    fetch(API_BASE_URL + "/auth/logout", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true"
+        },
+        body: JSON.stringify({ session_id: sessionId })
+    })
+        .then(function() {
+            sessionStorage.removeItem(SESSION_STORAGE_KEY);
+            updateLoginUI();
+            loadRepoDropdown();
+        })
+        .catch(function() {
+            sessionStorage.removeItem(SESSION_STORAGE_KEY);
+            updateLoginUI();
+            loadRepoDropdown();
+        });
+}
 
 function setPreset(text) {
     document.getElementById("prompt").value = text;
@@ -12,7 +92,9 @@ function setPreset(text) {
 
 function loadRepoDropdown() {
     const repoSelect = document.getElementById("repo");
-    fetch(API_BASE_URL + "/list-repos", {
+    const sessionId = getSessionId();
+    const url = API_BASE_URL + "/list-repos" + (sessionId ? "?session_id=" + encodeURIComponent(sessionId) : "");
+    fetch(url, {
         headers: { "ngrok-skip-browser-warning": "true" }
     })
         .then(function(response) { return response.json(); })
@@ -24,7 +106,7 @@ function loadRepoDropdown() {
             repoSelect.innerHTML = "";
             data.repos.forEach(function(repo) {
                 const option = document.createElement("option");
-                option.value = repo.name;
+                option.value = repo.full_name;
                 option.textContent = repo.full_name + (repo.private ? " (private)" : "");
                 repoSelect.appendChild(option);
             });
@@ -167,7 +249,10 @@ function waitForReportAvailable(reportUrl, onReady, attemptsLeft) {
 }
 
 function runScan() {
-    const repo = document.getElementById("repo").value.trim();
+    const repoFullName = document.getElementById("repo").value.trim();
+    const repoParts = repoFullName.split("/");
+    const scanOwner = repoParts.length === 2 ? repoParts[0] : DEFAULT_OWNER;
+    const repo = repoParts.length === 2 ? repoParts[1] : repoFullName;
     const prompt = document.getElementById("prompt").value.trim();
     const statusDiv = document.getElementById("status");
     const resultBox = document.getElementById("resultBox");
@@ -192,7 +277,7 @@ function runScan() {
             "Content-Type": "application/json",
             "ngrok-skip-browser-warning": "true"
         },
-        body: JSON.stringify({ owner: DEFAULT_OWNER, repo: repo, prompt: prompt, scan_id: currentScanId })
+        body: JSON.stringify({ owner: scanOwner, repo: repo, prompt: prompt, scan_id: currentScanId, session_id: getSessionId() })
     })
     .then(function(response) {
         return response.json();
@@ -239,5 +324,7 @@ function runScan() {
     });
 }
 
+captureSessionIdFromUrl();
+updateLoginUI();
 loadRepoDropdown();
 loadSavedPrompts();

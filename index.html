@@ -11,6 +11,12 @@
         <h1>AI Security Review Platform</h1>
         <p class="subtitle">Scan any of your GitHub repositories for security vulnerabilities using AI</p>
 
+        <div class="login-bar">
+            <span id="loginStatus" class="login-status">Checking sign-in status...</span>
+            <button id="loginBtn" class="login-btn hidden" onclick="loginWithGitHub()">Sign in with GitHub</button>
+            <button id="logoutBtn" class="logout-btn hidden" onclick="logout()">Sign out</button>
+        </div>
+
         <div class="form-group">
             <label for="repo">Repository</label>
             <select id="repo">
@@ -20,16 +26,16 @@
 
         <div class="form-group">
             <label for="prompt">Custom Review Focus (optional)</label>
-            <textarea id="prompt" rows="3" placeholder="e.g. Review for authentication flaws and access control issues"></textarea>
+            <textarea id="prompt" rows="3" placeholder="e.g. Focus only on SQL injection and authentication issues"></textarea>
             <div class="preset-label-row">
                 <span class="preset-label">Suggested prompts (click to use):</span>
                 <button type="button" class="clear-btn" onclick="setPreset('')">&#10005; clear</button>
             </div>
             <div class="preset-buttons">
-                <button type="button" class="preset-btn" onclick="setPreset('Review for SQL injection and unsafe database query construction')">SQL Injection</button>
-                <button type="button" class="preset-btn" onclick="setPreset('Audit against OWASP Top 10 security risks')">OWASP Top 10</button>
-                <button type="button" class="preset-btn" onclick="setPreset('Identify performance bottlenecks and inefficient code patterns')">Performance</button>
-                <button type="button" class="preset-btn" onclick="setPreset('Detect hardcoded credentials, API keys, tokens, and secrets')">Hardcoded Secrets</button>
+                <button type="button" class="preset-btn" onclick="setPreset('SQL injection and database security')">SQL Injection</button>
+                <button type="button" class="preset-btn" onclick="setPreset('OWASP Top 10 vulnerabilities')">OWASP Top 10</button>
+                <button type="button" class="preset-btn" onclick="setPreset('performance and code efficiency')">Performance</button>
+                <button type="button" class="preset-btn" onclick="setPreset('Find hardcoded credentials, API keys, passwords, tokens, and secrets in the code')">Hardcoded Secrets</button>
             </div>
             <div class="saved-prompts-row">
                 <button type="button" class="save-prompt-btn" onclick="saveCurrentPrompt()">+ Save current prompt</button>
